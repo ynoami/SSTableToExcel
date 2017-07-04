@@ -21,8 +21,21 @@ namespace SSTableToExcel
             
             var setting = new Models.DBSetting() { サーバー名 = pcName, データベース名 = dbName, ユーザー名 = userName, パスワード = password };
 
-            var db = new Models.DBAccess();
-            db.Getter(setting);
+            try
+            {
+                var db = new Models.DBAccess();
+                db.Getter(setting);
+
+                Console.WriteLine("保存終了しました。");
+            }
+            catch (Exception e)
+            {
+                // 例外はすべてさらけ出す
+                Console.WriteLine(e);
+            }
+
+            Console.WriteLine("なにかキーを押してください");
+            Console.ReadKey();
         }
     }
 }

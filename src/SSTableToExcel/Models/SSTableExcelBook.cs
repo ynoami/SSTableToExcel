@@ -20,6 +20,8 @@ namespace SSTableToExcel.Models
         /// <param name="columnNames">テーブル列名の並び</param>
         public void AppendExcelSheet(List<dynamic> records, string tableName, string[] columnNames)
         {
+            Progress.Set(tableName);
+
             // テーブルをインデックスに追記
             AppendIndex(tableName, records.Count);
 
@@ -40,6 +42,11 @@ namespace SSTableToExcel.Models
             // シートに全レコード書き込み (2行目以降)
             for (int rowIndex = 0; rowIndex < records.Count; rowIndex++)
             {
+                if ((rowIndex % 50) == 0)
+                {
+                    Progress.AppendProgress();
+                }
+
                 var columnValues = (records[rowIndex] as IDictionary<string, object>).Select(_ => _.Value).ToArray();
                 for (int columnIndex = 0; columnIndex < columnNames.Length; columnIndex++)
                 {
@@ -48,6 +55,8 @@ namespace SSTableToExcel.Models
                     fieldCell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left;
                 }
             }
+
+            Progress.Clear();
         }
 
         /// <summary>
@@ -56,7 +65,9 @@ namespace SSTableToExcel.Models
         /// <param name="fileName">保存先ファイル名</param>
         public void SaveAs(string fileName)
         {
+            Progress.Set("Excelファイルを保存中です");
             _book.SaveAs(fileName);
+            Progress.Clear();
         }
 
         /// <summary>
@@ -91,5 +102,26 @@ namespace SSTableToExcel.Models
         private const string INDEXSHEETNAME = "index";
         private const int IndexsheetTableNameColumnIndex = 2;
         private const int IndexsheetTableCountColumnIndex = 3;
+    }
+
+    public class Progress
+    {
+        public static void Set(string message)
+        {
+            Console.Write(message);
+        }
+
+        public static void AppendProgress()
+        {
+            Console.Write(".");
+        }
+
+        public static void Clear()
+        {
+            int currentLineCursor = Console.CursorTop;
+            Console.SetCursorPosition(0, Console.CursorTop);
+            Console.Write(new string(' ', Console.WindowWidth));
+            Console.SetCursorPosition(0, currentLineCursor);
+        }
     }
 }
