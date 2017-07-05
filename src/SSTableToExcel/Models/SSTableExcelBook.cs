@@ -10,14 +10,14 @@ namespace SSTableToExcel.Models
     {
         private List<string> _tables = new List<string>();
         private XLWorkbook _book = new XLWorkbook();
-
+        
         /// <summary>
         /// テーブル情報Excelシートを追加
         /// </summary>
         /// <param name="records">テーブル情報</param>
         /// <param name="tableName">テーブル名</param>
         /// <param name="columnNames">テーブル列名の並び</param>
-        public void AppendExcelSheet(List<dynamic> records, string tableName, string[] columnNames)
+        public void AppendExcelSheet(List<Dictionary<string,object>> records, string tableName, string[] columnNames)
         {
             Progress.Set(tableName);
 

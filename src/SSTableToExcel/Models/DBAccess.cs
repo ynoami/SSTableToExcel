@@ -25,7 +25,7 @@ namespace SSTableToExcel.Models
             using (var con = GetConnection(setting))
             {
                 // 先頭が「M_」から始まるテーブル名を取得
-                var names = con.Query("select name from sysobjects where xtype = 'U' and name like 'M_%' order by name").Select(_ => _.name as string).ToArray();
+                var names = con.Query<Dictionary<string, object>>("select name from sysobjects where xtype = 'U' and name like 'M_%' order by name", null).Select(_ => _.Values.First() as string).ToArray();
 
                 // 出力先ディレクトリ作成(雑)
                 var directoryName = $"{DateTime.Now.ToString("yyyyMMddHHmmss")}";
@@ -37,13 +37,14 @@ namespace SSTableToExcel.Models
                 foreach (var tableName in names)
                 {
                     // 全フィールド及びフィールド名を取得(dynamicのまま)[インジェクション対策はしていません！]
-                    var records = con.Query($"select * from {tableName}").ToList();
-                    var columnNames = con.Query($"select COLUMN_NAME from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '{tableName}' order by ORDINAL_POSITION").Select(_ => _.COLUMN_NAME as string).ToArray();
+                    var records = con.Query<Dictionary<string, object>>($"select * from {tableName}", null).ToList();
+                    var columnNames = con.Query<Dictionary<string, object>>($"select COLUMN_NAME from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '{tableName}' order by ORDINAL_POSITION", null)
+                        .Select(_ => _.Values.First() as string).ToArray();
 
-                    // JSON形式で出力
+                    //// JSON形式で出力
                     WriteJson(records, directoryName, tableName);
 
-                    // Excelにシートを追加
+                    //// Excelにシートを追加
                     book.AppendExcelSheet(records, tableName, columnNames);
                 }
 
@@ -52,7 +53,7 @@ namespace SSTableToExcel.Models
             }
         }
 
-        private void WriteJson(List<dynamic> records, string directoryName, string tableName)
+        private void WriteJson(List<Dictionary<string, object>> records, string directoryName, string tableName)
         {
             var serializer = new JsonSerializer();
             using (var writer = new StreamWriter($"{directoryName}/JSON/{tableName}.json"))
