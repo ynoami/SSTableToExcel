@@ -112,6 +112,10 @@ namespace SSTableToExcel.Models
 
         public static void AppendProgress()
         {
+            if ((Console.CursorLeft +1) == Console.WindowWidth)
+            {
+                Clear();
+            }
             Console.Write(".");
         }
 
