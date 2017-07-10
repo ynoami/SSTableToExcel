@@ -27,8 +27,8 @@ namespace SSTableToExcel.Models
             // もし、レコード数が0ならシートを追加しない
             if (records.Count == 0) return;
 
-            // テーブルシートを作成
-            var sheet = _book.AddWorksheet(tableName);
+            // テーブルシートを作成(Excelのシート名は上限31文字らしい[2バイト文字でも1文字扱い])
+            var sheet = _book.AddWorksheet((tableName.Length >= 31) ? tableName.Substring(0, 31) : tableName);
 
             // シートにヘッダを書き込み (1行目)
             for (int index = 0; index < columnNames.Length; index++)
